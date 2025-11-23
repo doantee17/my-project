@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/hieubossgr/shoppemini.git'  // Sửa repo theo lab (shoppemini)
+                git branch: 'main', url: 'https://github.com/doantee17/my-project.git'  // Sửa repo theo lab (shoppemini)
             }
         }
         stage('Get Commit Hash') {
