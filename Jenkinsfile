@@ -5,7 +5,7 @@ pipeline {
         ECR_REPO = "591313757404.dkr.ecr.ap-southeast-1.amazonaws.com/test1"  // ECR repo từ lab trước
         CLUSTER_NAME = "test1"  // Tên ECS Cluster từ thông tin trước
         SERVICE_NAME = "test-service-8k1bg1mo"  // Tên ECS Service từ thông tin trước
-        CONTAINER_NAME = "container1"  // Tên container từ script trước (thay "container1")
+        CONTAINER_NAME = "my-container"  // Tên container từ script trước (thay "container1")
         IMAGE_TAG = ""  // Khai báo trước để dùng toàn pipeline
         TASK_DEF_ARN = ""  // Khai báo luôn
     }
