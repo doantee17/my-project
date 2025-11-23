@@ -4,7 +4,7 @@
   "containerDefinitions": [
     {
       "name": "container1",
-      "image": "591313757404.dkr.ecr.ap-southeast-1.amazonaws.com/test1:<IMAGE_TAG>",
+      "image": "<IMAGE_URI>",
       "memory": 512,
       "cpu": 256,
       "essential": true,
