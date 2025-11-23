@@ -30,7 +30,7 @@ pipeline {
         }
         stage('Login to ECR') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([usernamePassword(credentialsId: '1707', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh """
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
                     """  // Sửa multi-line để tránh conflict $
@@ -46,7 +46,7 @@ pipeline {
         }
         stage('Register ECS Task Definition') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([usernamePassword(credentialsId: '1707', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         def taskDefFile = "ecs-task-def-${IMAGE_TAG}.json"
                         sh """
@@ -65,7 +65,7 @@ pipeline {
         }
         stage('Deploy ECS') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'aws-creds',
+                withCredentials([usernamePassword(credentialsId: '1707',
                                                   usernameVariable: 'AWS_ACCESS_KEY_ID',
                                                   passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
