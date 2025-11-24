@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm  // Chỉ checkout từ repo my-project.git
+                checkout scm  // Chỉ dùng Declarative SCM từ repo my-project.git
             }
         }
         stage('Get Commit Hash') {
@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Build Docker') {
             steps {
-                sh "docker build -t $$ {env.ECR_REPO}: $${env.IMAGE_TAG} ."
+                sh "docker build -t ${env.ECR_REPO}:${env.IMAGE_TAG} ."  // Sửa: Không $$ , dùng ${env.VAR} trực tiếp
             }
         }
         stage('Login to ECR') {
@@ -39,8 +39,8 @@ pipeline {
         }
         stage('Tag & Push') {
             steps {
-                sh "docker tag $$ {env.ECR_REPO}: $${env.IMAGE_TAG} ${env.ECR_REPO}:latest"
-                sh "docker push $$ {env.ECR_REPO}: $${env.IMAGE_TAG}"
+                sh "docker tag ${env.ECR_REPO}:${env.IMAGE_TAG} ${env.ECR_REPO}:latest"
+                sh "docker push ${env.ECR_REPO}:${env.IMAGE_TAG}"
                 sh "docker push ${env.ECR_REPO}:latest"
             }
         }
@@ -50,7 +50,7 @@ pipeline {
                     script {
                         def taskDefFile = "ecs-task-def-${env.IMAGE_TAG}.json"
                         sh """
-                            sed 's|<FULL_IMAGE>|$$ {env.ECR_REPO}: $${env.IMAGE_TAG}|g' ecs-task-def-template.json > ${taskDefFile}
+                            sed 's|<FULL_IMAGE>|${env.ECR_REPO}:${env.IMAGE_TAG}|g' ecs-task-def-template.json > ${taskDefFile}
                         """
                         def arn = sh(script: """
                             aws ecs register-task-definition \
