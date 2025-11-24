@@ -5,7 +5,7 @@ pipeline {
     ECR_REGISTRY = "591313757404.dkr.ecr.ap-southeast-1.amazonaws.com"
     ECR_REPO = "${ECR_REGISTRY}/test1"
     CLUSTER_NAME = "test1"
-    SERVICE_NAME = "test2-service"
+    SERVICE_NAME = "test2-service1"
   }
   stages {
     stage('Checkout') {
