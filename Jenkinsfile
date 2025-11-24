@@ -9,19 +9,16 @@ pipeline {
   }
   stages {
     stage('Checkout') {
-      steps {
-        checkout scm
-      }
+      steps { checkout scm }
     }
 
     stage('Get Commit Hash') {
       steps {
         script {
-          IMAGE_TAG = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-          if (!IMAGE_TAG) {
-            error "IMAGE_TAG is empty – aborting pipeline"
-          }
+          def IMAGE_TAG = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+          if (!IMAGE_TAG) { error "IMAGE_TAG is empty – aborting pipeline" }
           echo "Using image tag: ${IMAGE_TAG}"
+          env.IMAGE_TAG = IMAGE_TAG
         }
       }
     }
@@ -37,7 +34,6 @@ pipeline {
 
     stage('Login to ECR') {
       steps {
-        // Use AWS keys stored in Jenkins credentials (username=AWS_ACCESS_KEY_ID, password=AWS_SECRET_ACCESS_KEY)
         withCredentials([usernamePassword(credentialsId: '1707', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh '''
             set -e
@@ -62,8 +58,40 @@ pipeline {
       steps {
         script {
           def taskDefFile = "ecs-task-def-${IMAGE_TAG}.json"
-          // Read template, replace placeholder, write new file (do replacement in Groovy to avoid sed pitfalls)
-          def tpl = readFile file: '/mnt/data/ecs-task-def-template.json'
+          def tpl = ''
+          if (fileExists('ecs-task-def-template.json')) {
+            tpl = readFile('ecs-task-def-template.json')
+          } else {
+            echo "WARNING: template not found in workspace — using embedded fallback"
+            tpl = '''{
+  "family": "test1-task",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "container1",
+      "image": "<FULL_IMAGE>",
+      "memory": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 3000, "hostPort": 3000, "protocol": "tcp" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/test1",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::591313757404:role/ecsTaskExecutionRole"
+}'''
+          }
           def replaced = tpl.replaceAll('<FULL_IMAGE>', "${ECR_REPO}:${IMAGE_TAG}")
           writeFile file: taskDefFile, text: replaced
           sh "echo '---- TASK DEF ----'; cat ${taskDefFile}; echo '------------------'"
@@ -76,7 +104,6 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: '1707', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           script {
             def taskDefFile = "ecs-task-def-${IMAGE_TAG}.json"
-            // register and capture ARN, fail with debug if empty
             def arn = sh(script: """
               set -e
               aws ecs register-task-definition --cli-input-json file://${taskDefFile} --query 'taskDefinition.taskDefinitionArn' --output text || true
@@ -87,7 +114,6 @@ pipeline {
               sh "aws ecs register-task-definition --cli-input-json file://${taskDefFile} --debug || true"
               error "Register-task-definition failed, aborting"
             }
-            // update service
             sh """
               aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${arn} --force-new-deployment
             """
