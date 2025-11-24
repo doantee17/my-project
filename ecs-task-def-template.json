@@ -4,7 +4,7 @@
   "containerDefinitions": [
     {
       "name": "container1",
-      "image": "<IMAGE_URI>",
+      "image": "<FULL_IMAGE>",
       "memory": 512,
       "cpu": 256,
       "essential": true,
