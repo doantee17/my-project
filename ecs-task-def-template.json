@@ -1,5 +1,5 @@
 {
-  "family": "test1-task",
+  "family": "test2",
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
@@ -18,7 +18,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/test1",
+          "awslogs-group": "/ecs/test2",
           "awslogs-region": "ap-southeast-1",
           "awslogs-stream-prefix": "ecs"
         }

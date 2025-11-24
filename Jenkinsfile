@@ -5,7 +5,7 @@ pipeline {
     ECR_REGISTRY = "591313757404.dkr.ecr.ap-southeast-1.amazonaws.com"
     ECR_REPO = "${ECR_REGISTRY}/test1"
     CLUSTER_NAME = "test1"
-    SERVICE_NAME = "test-service-8k1bg1mo"
+    SERVICE_NAME = "test2-service"
   }
   stages {
     stage('Checkout') {
@@ -64,7 +64,7 @@ pipeline {
           } else {
             echo "WARNING: template not found in workspace — using embedded fallback"
             tpl = '''{
-  "family": "test1-task",
+  "family": "test2",
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
